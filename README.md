@@ -72,13 +72,6 @@ pipeline {
 
 Each scanner accepts a configuration map. Key options include:
 
-### Common Docker Overrides (`docker` map)
-- `mounts`: List of mount definitions (`[source: '/host/path', target: '/container/path', readOnly: true]`).
-- `env`: Environment variables to expose to the container (`[VAR_NAME: 'value']`).
-- `options`: Additional raw Docker CLI flags (for example, `['--network host']`).
-- `remove` / `tty`: Toggle `--rm` and `-t` flags respectively (default: `true`).
-- `workdir`, `network`, `entrypoint`: Optional Docker run flags passed through to the container.
-
 ### OWASP ZAP (`zap`)
 - `targetUrl` (**required**): URL of the running web application to scan.
 - `image`: Docker image to use (default: `owasp/zap2docker-stable`).
@@ -103,7 +96,6 @@ Each scanner accepts a configuration map. Key options include:
 
 ### Semgrep (`semgrep`)
 - `config`: Semgrep configuration (`auto`, registry IDs, or local files; default: `auto`).
-- `command`: Underlying Semgrep CLI subcommand (default: `ci`).
 - `severity`: Limit findings to specific severities.
 - `output`: Optional output file.
 - `args`: Extra command-line arguments.

@@ -1,0 +1,166 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>4.80</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>devsecops-pipeline</artifactId>
+    <packaging>hpi</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>DevSecOps Pipeline</name>
+    <description>Reusable DevSecOps pipeline orchestration packaged as a Jenkins plugin.</description>
+    <url>https://github.com/example/devsecops-pipeline</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/example/devsecops-pipeline.git</connection>
+        <developerConnection>scm:git:git@github.com:example/devsecops-pipeline.git</developerConnection>
+        <url>https://github.com/example/devsecops-pipeline</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>devsecops</id>
+            <name>DevSecOps Maintainers</name>
+            <email>maintainers@example.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <revision>1.0</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <java.level>11</java.level>
+        <jenkins.version>2.375.4</jenkins.version>
+        <workflow-cps-plugin.version>3883.vd30a_30f2c41e</workflow-cps-plugin.version>
+        <workflow-basic-steps-plugin.version>1017.vb_45b_302f0cea_</workflow-basic-steps-plugin.version>
+        <script-security-plugin.version>1279.v3c072817cb_8a_</script-security-plugin.version>
+        <spotless.version>2.43.0</spotless.version>
+        <spotbugs.version>4.7.3.4</spotbugs.version>
+        <checkstyle.version>10.12.3</checkstyle.version>
+        <checkstyle.plugin.version>3.3.0</checkstyle.plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>${workflow-cps-plugin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-basic-steps</artifactId>
+            <version>${workflow-basic-steps-plugin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>script-security</artifactId>
+            <version>${script-security-plugin.version}</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jenkins-public</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jenkins-public</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${spotbugs.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${checkstyle.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <java>
+                        <googleJavaFormat/>
+                    </java>
+                    <groovy>
+                        <greclipse/>
+                    </groovy>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-validation</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <effort>max</effort>
+                    <threshold>Low</threshold>
+                    <excludeFilterFile>config/spotbugs/spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

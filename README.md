@@ -1,8 +1,6 @@
-# DevSecOps Jenkins Plugin
+# DevSecOps Jenkins Shared Library
 
-This repository packages a DevSecOps-focused Jenkins Pipeline shared library as a first-class Jenkins plugin. It orchestrates
-popular application security and cloud-native scanning tools while bundling build tooling, linting, and release configuration so
-teams can publish the plugin to an update center or internal artifact repository with minimal customization.
+This repository provides a Jenkins Shared Library that orchestrates popular application security and cloud-native scanning tools. It focuses on delivering a practical DevSecOps pipeline that covers dynamic testing, software composition analysis, infrastructure configuration scanning, and developer-centric linting.
 
 ## Tooling Overview
 
@@ -15,30 +13,15 @@ teams can publish the plugin to an update center or internal artifact repository
 | Developer-friendly all-in-one solution | ⚡ Snyk | Combines SAST + SCA + IaC + Fix guidance |
 | Legacy Java project CVE scanning | ☕ OWASP Dependency-Check | Built for Maven/Gradle ecosystems |
 
-## Getting Started
+## Library Usage
 
-### Build the Plugin
-
-```bash
-mvn --batch-mode verify
-```
-
-The build runs Spotless, Checkstyle, and SpotBugs to keep both Java and Groovy sources linted before packaging the plugin HPI.
-Artifacts are published to `target/` and archived automatically when using the included Jenkins Pipeline (`Jenkinsfile`).
-
-### Install into Jenkins
-
-1. Upload `target/devsecops-pipeline.hpi` through `Manage Jenkins` → `Manage Plugins` → `Advanced` → `Upload Plugin` (or push to your
-   update center).
-2. Restart Jenkins if prompted.
-3. The `devsecops` shared library is loaded implicitly for all Pipelines—no extra configuration in *Global Pipeline Libraries* is required.
-
-## Using the Pipeline Steps
-
-Invoke the `devSecOpsPipeline` step inside your Jenkins Pipeline to orchestrate the scanners you need. Each scanner can be configured
-independently, and execution can run sequentially or in parallel.
+1. Add this repository as a Jenkins Shared Library (`Manage Jenkins` → `Configure System` → `Global Pipeline Libraries`).
+2. Reference the library in your pipeline using `@Library('devsecops') _` (adjust the name to match your configuration).
+3. Invoke the `devSecOpsPipeline` step inside a pipeline stage and enable the scanners you need.
 
 ```groovy
+@Library('devsecops') _
+
 pipeline {
     agent any
 
@@ -89,13 +72,6 @@ pipeline {
 
 Each scanner accepts a configuration map. Key options include:
 
-### Common Docker Overrides (`docker` map)
-- `mounts`: List of mount definitions (`[source: '/host/path', target: '/container/path', readOnly: true]`).
-- `env`: Environment variables to expose to the container (`[VAR_NAME: 'value']`).
-- `options`: Additional raw Docker CLI flags (for example, `['--network host']`).
-- `remove` / `tty`: Toggle `--rm` and `-t` flags respectively (default: `true`).
-- `workdir`, `network`, `entrypoint`: Optional Docker run flags passed through to the container.
-
 ### OWASP ZAP (`zap`)
 - `targetUrl` (**required**): URL of the running web application to scan.
 - `image`: Docker image to use (default: `owasp/zap2docker-stable`).
@@ -120,7 +96,6 @@ Each scanner accepts a configuration map. Key options include:
 
 ### Semgrep (`semgrep`)
 - `config`: Semgrep configuration (`auto`, registry IDs, or local files; default: `auto`).
-- `command`: Underlying Semgrep CLI subcommand (default: `ci`).
 - `severity`: Limit findings to specific severities.
 - `output`: Optional output file.
 - `args`: Extra command-line arguments.
@@ -140,8 +115,7 @@ Each scanner accepts a configuration map. Key options include:
 
 ## Parallel Execution
 
-Set `parallel: true` to run all enabled scanners concurrently. Jenkins creates separate stages for each scanner. When `parallel`
-is `false`, scans run sequentially in the order defined above.
+Set `parallel: true` to run all enabled scanners concurrently. Jenkins will create separate stages for each scanner. When `parallel` is `false`, scans run sequentially in the order defined above.
 
 ## Requirements
 
@@ -149,11 +123,7 @@ is `false`, scans run sequentially in the order defined above.
 - Necessary credentials or tokens (for example, `SNYK_TOKEN`) must be configured in the Jenkins environment.
 - Target applications should be accessible from the Jenkins agent running OWASP ZAP.
 
-## Publishing Guidance
+## Reports
 
-1. Update the SCM coordinates in `pom.xml` to reflect your organization.
-2. Run `mvn -DskipTests=false release:prepare release:perform` (after configuring credentials) to publish to an update center or Maven
-   repository.
-3. Tag the release in source control and update any downstream documentation.
+Most scanners write reports into the workspace. Archive them or publish results after the `devSecOpsPipeline` step using Jenkins post actions or additional stages tailored to your organization.
 
-The repository ships with Spotless, Checkstyle, and SpotBugs enabled during `verify` to keep code quality consistent before release.

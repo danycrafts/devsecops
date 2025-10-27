@@ -1,0 +1,13 @@
+<?jelly escape-by-default='true'?>
+<html>
+  <body>
+    <h1>DevSecOps Pipeline Plugin</h1>
+    <p>
+      Provides pre-configured Jenkins Pipeline steps for DevSecOps scanning using
+      OWASP ZAP, Grype, Trivy, Semgrep, Snyk, and OWASP Dependency-Check.
+    </p>
+    <p>
+      Refer to the README for usage examples and configuration details.
+    </p>
+  </body>
+</html>

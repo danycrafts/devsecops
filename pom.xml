@@ -72,20 +72,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>jenkins-public</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jenkins-public</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
         <pluginManagement>
             <plugins>

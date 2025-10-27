@@ -1,0 +1,66 @@
+name: Publish to Jenkins Marketplace
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Plugin version to publish (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  publish:
+    name: Release artifact to Jenkins Update Center
+    runs-on: ubuntu-latest
+    env:
+      JENKINS_USERNAME: ${{ secrets.JENKINS_USERNAME }}
+      JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Jenkins credentials
+        run: |
+          if [ -z "$JENKINS_USERNAME" ] || [ -z "$JENKINS_API_TOKEN" ]; then
+            echo "JENKINS_USERNAME and JENKINS_API_TOKEN secrets are required" >&2
+            exit 1
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Configure Maven settings with Jenkins credentials
+        run: |
+          mkdir -p "$HOME/.m2"
+          cat <<SETTINGS > "$HOME/.m2/settings.xml"
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 https://maven.apache.org/xsd/settings-1.1.0.xsd">
+            <servers>
+              <server>
+                <id>jenkins-releases</id>
+                <username>${JENKINS_USERNAME}</username>
+                <password>${JENKINS_API_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+
+      - name: Set release version
+        run: mvn -B -ntp versions:set -DnewVersion=${{ inputs.version }} versions:commit
+
+      - name: Deploy plugin to Jenkins Update Center
+        env:
+          MAVEN_USERNAME: ${{ secrets.JENKINS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.JENKINS_API_TOKEN }}
+        run: mvn -B -ntp -DskipTests clean deploy -Prelease
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: devsecops-plugin-${{ inputs.version }}
+          path: target/*.hpi

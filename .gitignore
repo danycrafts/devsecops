@@ -1,0 +1,23 @@
+# Maven
+.m2/
+/target/
+release.properties
+pom.xml.versionsBackup
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Spotless
+**/.spotless*

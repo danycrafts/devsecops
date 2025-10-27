@@ -1,0 +1,57 @@
+name: Release v1.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Plugin version to release (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-and-release:
+    name: Build and publish GitHub release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Configure release version
+        run: mvn -B -ntp versions:set -DnewVersion=${{ inputs.version }} versions:commit
+
+      - name: Build plugin artifacts
+        run: mvn -B -ntp -DskipTests clean package
+
+      - name: Locate plugin artifact
+        id: artifact
+        run: |
+          HPI_PATH=$(ls target/*.hpi)
+          echo "path=${HPI_PATH}" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$HPI_PATH")" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          release_name: DevSecOps Plugin v${{ inputs.version }}
+          body_path: RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload plugin HPI
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.artifact.outputs.path }}
+          asset_name: ${{ steps.artifact.outputs.name }}
+          asset_content_type: application/java-archive

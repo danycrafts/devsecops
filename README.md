@@ -1,6 +1,17 @@
 # DevSecOps Jenkins Shared Library
 
-This repository provides a Jenkins Shared Library that orchestrates popular application security and cloud-native scanning tools. It focuses on delivering a practical DevSecOps pipeline that covers dynamic testing, software composition analysis, infrastructure configuration scanning, and developer-centric linting.
+This repository provides a Jenkins Shared Library **and** an accompanying reference Jenkins pipeline that orchestrate popular application security and cloud-native scanning tools. The pipeline focuses on delivering a practical DevSecOps workflow that now supports multi-repository synchronization, Docker image publishing metadata, and end-to-end GitLab commit status reporting.
+
+## Jenkins Pipeline Overview
+
+The top-level `Jenkinsfile` demonstrates how to run the shared library in a hardened CI/CD process. Key characteristics include:
+
+- **Environment bootstrapping:** The first stage performs a clean checkout of this repository, authenticates to the configured Docker registry, and synchronizes any extra Git repositories defined in [`config/repositories.yaml`](config/repositories.yaml). Repositories are described through a map of entries that declare the Git URL, the destination folder, the preferred branch, and a type label such as `backend`, `frontend`, or `api`.
+- **Docker image metadata:** Pipeline parameters expose `DOCKER_IMAGE`, `DOCKER_TAG`, and `DOCKER_REGISTRY`, while credentials referenced by `DOCKER_REGISTRY_CREDENTIALS` are used to log in automatically before any build activity takes place.
+- **Commit status visibility:** Every pipeline stage is wrapped with `gitLabCommitStatus` so GitLab merge requests and commits reflect the precise stage outcome.
+- **Report publishing:** Maven Surefire HTML reports are generated and published via the Jenkins HTML Publisher plugin alongside the existing JUnit XML archiving.
+
+> **Tip:** Update `config/repositories.yaml` to enable cloning of additional services that should be present in the Jenkins workspace. Set `enabled: true` for the repositories you need, and provide per-entry `branch` and `type` values to organize the checkout targets.
 
 ## Tooling Overview
 

@@ -1,0 +1,26 @@
+# Repository synchronization configuration
+#
+# Define each repository with the following structure:
+# - url: <git url>
+#   folder: <target directory>
+#   type: <backend|frontend|api|...>
+#   branch: <branch to checkout>
+#   enabled: <true|false> (optional, defaults to true)
+#
+# The default configuration keeps the list empty so pipeline runs without cloning additional repositories.
+repositories:
+  - url: https://git.example.com/backend-service.git
+    folder: backend-service
+    type: backend
+    branch: main
+    enabled: false
+  - url: https://git.example.com/frontend-app.git
+    folder: frontend-app
+    type: frontend
+    branch: main
+    enabled: false
+  - url: https://git.example.com/api-gateway.git
+    folder: api-gateway
+    type: api
+    branch: develop
+    enabled: false
